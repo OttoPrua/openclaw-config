@@ -1,67 +1,42 @@
-# openclaw-config
+# 🦞 OpenClaw Config & Skills Hub
 
-> Personal OpenClaw workspace — skills, configs & workflow guides
+<p align="center">
+  <strong>个人 OpenClaw 配置、独立 Skill 与工作流导引集合中心</strong>
+</p>
+<p align="center">
+  <a href="#快速开始">快速开始</a> •
+  <a href="#我的-skills">我的 Skills</a> •
+  <a href="#配置与指南">配置与指南</a>
+</p>
 
 ---
 
-## 🇨🇳 中文
+这个仓库用于聚合与索引我个人的 [OpenClaw](https://github.com/openclaw/openclaw) 配置和自定义 Skills。**为了方便单独维护和「一键抄作业」，每个复杂的 Skill 都有自己的独立仓库。**
 
-这个仓库用于存放我个人的 [OpenClaw](https://github.com/openclaw/openclaw) 配置、自定义 Skills 和工作流导引。
+## 🧩 我的 Skills
 
-### 内容结构
+| 插件名称 | 状态 | 功能简介 | 独立仓库地址 |
+|---------|------|----------|--------------|
+| [openclaw-wechat-bot](https://github.com/OttoPrua/openclaw-wechat-bot) | ✅ 稳定 | 将 OpenClaw Agent 原生接入微信群聊（macOS 本地运行，防封号，群直连） | [前往 Repo](https://github.com/OttoPrua/openclaw-wechat-bot) |
+| *(即将到来)* | ⏳ | 更多自动化工作流与 AI 助理技能... | - |
 
-| 目录 / 文件 | 说明 |
-|------------|------|
-| `skills/` | 自定义 Agent Skills |
-| `configs/` | OpenClaw 配置文件与备份 |
-| `guides/` | 工作流教程与使用说明 |
-| `README.md` | 本文件 |
+## ⚙️ 配置与指南 (`configs/` & `guides/`)
 
-### 关于 OpenClaw
-
-OpenClaw 是一个个人 AI 助理框架，支持多 Agent 协作、Skill 扩展、Cron 任务调度等功能。  
-官网：[openclaw.ai](https://openclaw.ai) · 社区：[Discord](https://discord.com/invite/clawd) · Skills 市场：[clawhub.com](https://clawhub.com)
-
-### 使用说明
-
-1. Clone 本仓库
-2. 将 `skills/` 目录下的 Skill 文件夹复制到你的 OpenClaw workspace
-3. 参考 `guides/` 中的文档进行配置
+一些通用的 OpenClaw 配置文件、架构约定和日常工作流说明将存放在此仓库的对应目录中。
 
 ---
 
 ## 🇬🇧 English
 
-This repository contains my personal [OpenClaw](https://github.com/openclaw/openclaw) configuration, custom Skills, and workflow guides.
+This repository serves as a centralized hub for my personal [OpenClaw](https://github.com/openclaw/openclaw) configurations and custom Skills.
 
-### Structure
+To make it easier to maintain and fork, **complex skills are separated into their own dedicated repositories.**
 
-| Directory / File | Description |
-|-----------------|-------------|
-| `skills/` | Custom Agent Skills |
-| `configs/` | OpenClaw config files & backups |
-| `guides/` | Workflow tutorials & usage notes |
-| `README.md` | This file |
+### 🧩 My Skills
 
-### About OpenClaw
-
-OpenClaw is a personal AI assistant framework with multi-agent collaboration, Skill extensions, and cron scheduling.  
-Website: [openclaw.ai](https://openclaw.ai) · Community: [Discord](https://discord.com/invite/clawd) · Skill marketplace: [clawhub.com](https://clawhub.com)
-
-### Getting Started
-
-1. Clone this repository
-2. Copy Skill folders from `skills/` into your OpenClaw workspace
-3. Follow the docs in `guides/` to configure
+| Skill Name | Status | Description | Repo Link |
+|------------|--------|-------------|-----------|
+| [openclaw-wechat-bot](https://github.com/OttoPrua/openclaw-wechat-bot) | ✅ Stable | Natively connect an OpenClaw Agent to WeChat group chats on macOS (Safe, local execution). | [Go to Repo](https://github.com/OttoPrua/openclaw-wechat-bot) |
 
 ---
-
-## Acknowledgments / 致谢
-
-- [ahaduoduoduo/openclaw-wechat-plugin](https://github.com/ahaduoduoduo/openclaw-wechat-plugin) — WeChat integration via macOS notification monitoring. The `openclaw-wechat-bot` skill and guide in this repo are built on top of this work.
-
----
-
-## License
-
-MIT — feel free to fork and adapt for your own setup.
+*Inspired by the project structure of [BytePioneer-AI](https://github.com/BytePioneer-AI).*
