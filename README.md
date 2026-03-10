@@ -56,6 +56,12 @@ Website: [openclaw.ai](https://openclaw.ai) · Community: [Discord](https://disc
 
 ---
 
+## Acknowledgments / 致谢
+
+- [ahaduoduoduo/openclaw-wechat-plugin](https://github.com/ahaduoduoduo/openclaw-wechat-plugin) — WeChat integration via macOS notification monitoring. The `openclaw-wechat-bot` skill and guide in this repo are built on top of this work.
+
+---
+
 ## License
 
 MIT — feel free to fork and adapt for your own setup.

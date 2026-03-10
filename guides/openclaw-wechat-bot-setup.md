@@ -15,6 +15,8 @@
   - 原始方案：AppleScript 轮询 macOS 通知中心获取微信消息，再通过 UI 自动化发送回复
   - 原版针对较早版本 macOS，本指南记录了在 **macOS Tahoe（26.x）** 上运行所需的全部修改
 
+感谢 [ahaduoduoduo](https://github.com/ahaduoduoduo) 提供的原始插件方案，为本指南奠定了基础。
+
 ---
 
 ### 前置条件
@@ -176,9 +178,16 @@ cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak_$(date +%Y%m%d_%H%M%S
 - `SOUL.md`：Agent 的人格定义（角色、语气、边界）
 - `IDENTITY.md`：Agent 的身份信息
 
-#### Step 5 · 系统权限
+#### Step 5 · 系统权限与通知优化
 
-系统设置 → 通知 → 微信 → 开启**允许通知**。
+系统设置 → 通知 → 微信：
+
+| 设置项 | 推荐值 | 说明 |
+|--------|--------|------|
+| 允许通知 | **开启**（必须） | 不开启则完全无法接收消息 |
+| 提醒样式 | **持续**（推荐） | 设为「持续」后通知不会自动消失，AppleScript 有更充裕的时间轮询读取，减少漏消息。设为「临时」也可工作，但高频消息场景可能丢失 |
+
+> 💡 **额外建议**：确保微信始终在后台运行。微信在前台时不会弹出通知。可以将微信窗口最小化或被其他窗口遮挡，只要不是系统最前台应用即可。
 
 #### Step 6 · 启动与绑定群聊
 
@@ -231,6 +240,8 @@ This setup is based on:
 - **Primary reference**: [ahaduoduoduo/openclaw-wechat-plugin](https://github.com/ahaduoduoduo/openclaw-wechat-plugin)
   - Original approach: AppleScript polls macOS Notification Center for WeChat messages and uses UI automation to send replies
   - The original targets older macOS versions — this guide documents all changes required to run on **macOS Tahoe (26.x)**
+
+Thanks to [ahaduoduoduo](https://github.com/ahaduoduoduo) for the original plugin that laid the foundation for this guide.
 
 ---
 
@@ -393,9 +404,16 @@ Create `~/.openclaw/workspace-{your-agent-id}/` and add:
 - `SOUL.md`: personality definition (role, tone, boundaries)
 - `IDENTITY.md`: agent identity info
 
-#### Step 5 · System permissions
+#### Step 5 · System permissions & notification optimization
 
-System Settings → Notifications → WeChat → enable **Allow notifications**.
+System Settings → Notifications → WeChat:
+
+| Setting | Recommended | Notes |
+|---------|-------------|-------|
+| Allow notifications | **On** (required) | Without this, no messages can be received at all |
+| Alert style | **Persistent** (recommended) | "Persistent" keeps notifications visible until dismissed, giving AppleScript more time to poll and read them — reduces missed messages. "Temporary" also works but may lose messages in high-traffic scenarios |
+
+> 💡 **Tip**: Keep WeChat running in the background at all times. WeChat does not produce notifications when it is the frontmost app. Minimizing the window or having it behind other windows is fine — it just can't be the active foreground app.
 
 #### Step 6 · Start and bind a group
 
