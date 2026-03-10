@@ -24,7 +24,7 @@
 | macOS Tahoe 或以上 | 通知结构与旧版本有差异 |
 | 微信桌面版 | 需在后台运行（**不可置于最前台**） |
 | 微信通知权限 | 系统设置 → 通知 → 微信 → **允许通知**（必须开启） |
-| OpenClaw | 已安装并运行，`rossi` agent 已配置 |
+| OpenClaw | 已安装并运行，目标 agent 已配置 |
 
 > ⚠️ 微信在前台时不会弹出通知，消息将无法被捕获。
 
@@ -72,7 +72,9 @@ macOS 通知本身无法区分群聊和私聊。
 #### 修改 4 · 触发符替代 @mention
 
 `@mention` 通知内容被截断为 `发送者在群聊中@了你`，丢失实际消息。  
-解决方案：改用全角字符 `＆洛茜` 作为触发符（配置项 `botTrigger`）。
+解决方案：改用自定义全角字符作为触发符（配置项 `botTrigger`）。
+
+> 注：由于同样原因，`botName`（本地微信账号名）对消息路由无实质影响，可留空。
 
 ---
 
@@ -85,8 +87,8 @@ macOS 通知本身无法区分群聊和私聊。
 
 #### 修改 6 · Session 绑定 Agent
 
-原始 sessionKey 格式 `wechat:group:群名` 不含 agentId，会 fallback 到默认 agent（perlica）。  
-修复：sessionKey 改为 `agent:rossi:wechat:group:群名`，正确路由到洛茜。
+原始 sessionKey 格式 `wechat:group:群名` 不含 agentId，会 fallback 到默认 agent。  
+修复：sessionKey 改为 `agent:{agent-id}:wechat:group:群名`，正确路由到目标 agent。
 
 ---
 
@@ -106,35 +108,57 @@ git clone https://github.com/ahaduoduoduo/openclaw-wechat-plugin
 # 按上述 7 项修改内容修改 index.ts
 ```
 
-#### Step 2 · 配置 openclaw.json
+---
+
+#### Step 2 · 确认触发词 ⚠️
+
+在写入配置之前，先确定你的两个触发词：
+
+| 触发词 | 配置项 | 说明 | 示例 |
+|--------|--------|------|------|
+| **群绑定触发词** | `bindTrigger` | 在目标群里发这个词，将该群设为 agent 的激活群 | `！助手`、`！bind` |
+| **消息触发词** | `botTrigger` | 群成员在消息里加上这个词，agent 才会回复 | `＆助手`、`＆ai` |
+
+**选词建议：**
+- 使用全角字符（如 `！` `＆`），减少误触发
+- 两个触发词要能明显区分
+- 触发词会出现在每条需要 agent 回复的消息里，建议简短易输入
+
+**确认好触发词后**，将它们填入下方配置，再继续后续步骤。
+
+---
+
+#### Step 3 · 配置 openclaw.json
 
 备份：
 ```bash
 cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak_$(date +%Y%m%d_%H%M%S)
 ```
 
-在 `channels` 中添加：
+在 `channels` 中添加（替换 `{...}` 占位符）：
 ```json
 "wechat": {
   "enabled": true,
   "blockStreaming": true,
   "groupOnly": true,
-  "botName": "扫拖一体🤖",
-  "botTrigger": "＆洛茜",
-  "bindTrigger": "！洛茜",
-  "agent": "rossi",
-  "allowedGroups": ["你的群名"],
+  "botName": "",
+  "botTrigger": "{你的消息触发词}",
+  "bindTrigger": "{你的绑定触发词}",
+  "agent": "{your-agent-id}",
+  "allowedGroups": [],
   "allowedSenders": [],
   "rateLimitPerMinute": 20,
   "dailyTokenBudget": 50000
 }
 ```
 
+> `botName` 为本地微信登录账号名称。由于本方案不响应 @mention，此字段对消息路由无影响，留空即可。
+
 在 `agents.list` 中添加：
 ```json
 {
-  "id": "rossi",
-  "workspace": "~/.openclaw/workspace-rossi",
+  "id": "{your-agent-id}",
+  "workspace": "~/.openclaw/workspace-{your-agent-id}",
   "model": "anthropic/claude-sonnet-4-6",
   "tools": {
     "profile": "minimal",
@@ -146,23 +170,23 @@ cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak_$(date +%Y%m%d_%H%M%S
 }
 ```
 
-#### Step 3 · 配置洛茜人设
+#### Step 4 · 配置 Agent 人设
 
-创建 `~/.openclaw/workspace-rossi/` 目录，添加：
-- `SOUL.md`：洛茜的人格定义（角色、语气、边界）
-- `IDENTITY.md`：洛茜的身份信息
+创建 `~/.openclaw/workspace-{your-agent-id}/` 目录，添加：
+- `SOUL.md`：Agent 的人格定义（角色、语气、边界）
+- `IDENTITY.md`：Agent 的身份信息
 
-#### Step 4 · 系统权限
+#### Step 5 · 系统权限
 
 系统设置 → 通知 → 微信 → 开启**允许通知**。
 
-#### Step 5 · 启动与绑定群聊
+#### Step 6 · 启动与绑定群聊
 
 ```bash
 openclaw gateway restart
 ```
 
-在目标微信群中发送 `！洛茜`（全角感叹号），洛茜回复确认后即绑定成功。
+在目标微信群中发送你的 `{绑定触发词}`，agent 回复确认后即绑定成功。
 
 ---
 
@@ -170,8 +194,8 @@ openclaw gateway restart
 
 | 操作 | 方法 |
 |------|------|
-| 切换目标群 | 在新群发送 `！洛茜` |
-| 触发洛茜 | 在已绑定群发送 `＆洛茜 你的问题` |
+| 切换目标群 | 在新群发送 `{bindTrigger}` |
+| 触发 Agent | 在已绑定群发送 `{botTrigger} 你的问题` |
 | 查看当前绑定 | `grep "bound active group" /tmp/openclaw/openclaw-$(date +%Y-%m-%d).log \| tail -1` |
 
 ---
@@ -181,7 +205,7 @@ openclaw gateway restart
 - 通知文本最多约 65 字符，长文本被截断
 - 微信在前台时不触发通知
 - 发送时短暂占用前台和系统剪贴板（约 2 秒）
-- Gateway 重启后动态绑定重置，需重新发 `！洛茜`
+- Gateway 重启后动态绑定重置，需重新发绑定触发词
 - 不支持图片、语音、视频内容
 - 发送目标为微信当前激活窗口，需手动保持微信停在目标群聊
 
@@ -217,7 +241,7 @@ This setup is based on:
 | macOS Tahoe or later | Notification structure differs from earlier versions |
 | WeChat Desktop | Must run in background (**not frontmost**) |
 | WeChat notification permission | System Settings → Notifications → WeChat → **Allow notifications** (required) |
-| OpenClaw | Installed and running, `rossi` agent configured |
+| OpenClaw | Installed and running, target agent configured |
 
 > ⚠️ WeChat must not be the frontmost app — notifications only appear when WeChat is in the background.
 
@@ -265,7 +289,9 @@ Solution: parse notification body format (`sender: message content` → classify
 #### Fix 4 · Trigger Keyword Replaces @mention
 
 @mention notifications are truncated to `sender mentioned you in a group`, losing actual content.  
-Solution: use fullwidth `＆洛茜` as a trigger keyword (config key `botTrigger`).
+Solution: use a custom fullwidth character as a trigger keyword (config key `botTrigger`).
+
+> Note: For the same reason, `botName` (your local WeChat account name) has no effect on message routing and can be left empty.
 
 ---
 
@@ -278,8 +304,8 @@ Fix: use `Cmd+↓ → Cmd+↑` to focus the first input field.
 
 #### Fix 6 · Session-to-Agent Binding
 
-Original sessionKey format `wechat:group:groupName` doesn't include agentId → falls back to the default agent (perlica).  
-Fix: sessionKey changed to `agent:rossi:wechat:group:groupName` → correctly routes to rossi.
+Original sessionKey format `wechat:group:groupName` doesn't include agentId → falls back to the default agent.  
+Fix: sessionKey changed to `agent:{agent-id}:wechat:group:groupName` → correctly routes to target agent.
 
 ---
 
@@ -299,35 +325,57 @@ git clone https://github.com/ahaduoduoduo/openclaw-wechat-plugin
 # Apply the 7 fixes above to index.ts
 ```
 
-#### Step 2 · Configure openclaw.json
+---
+
+#### Step 2 · Decide your trigger keywords ⚠️
+
+Before writing any config, decide on your two trigger keywords:
+
+| Keyword | Config key | Purpose | Examples |
+|---------|------------|---------|---------|
+| **Bind trigger** | `bindTrigger` | Send this in a group to make it the agent's active group | `！bind`, `！assistant` |
+| **Message trigger** | `botTrigger` | Include this in a message to invoke the agent | `＆ai`, `＆assistant` |
+
+**Tips:**
+- Use fullwidth characters (e.g. `！` `＆`) to reduce accidental triggers
+- Make the two keywords clearly distinct
+- Keep them short — users will type the message trigger in every request
+
+**Fill in your chosen keywords before continuing.**
+
+---
+
+#### Step 3 · Configure openclaw.json
 
 Backup first:
 ```bash
 cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak_$(date +%Y%m%d_%H%M%S)
 ```
 
-Add to `channels`:
+Add to `channels` (replace `{...}` placeholders):
 ```json
 "wechat": {
   "enabled": true,
   "blockStreaming": true,
   "groupOnly": true,
-  "botName": "SweepBot🤖",
-  "botTrigger": "＆rossi",
-  "bindTrigger": "！rossi",
-  "agent": "rossi",
-  "allowedGroups": ["your-group-name"],
+  "botName": "",
+  "botTrigger": "{your message trigger}",
+  "bindTrigger": "{your bind trigger}",
+  "agent": "{your-agent-id}",
+  "allowedGroups": [],
   "allowedSenders": [],
   "rateLimitPerMinute": 20,
   "dailyTokenBudget": 50000
 }
 ```
 
+> `botName` is your local WeChat account name. Since this setup does not respond to @mentions (mention notifications are truncated and unusable), this field has no effect on routing and can be left empty.
+
 Add to `agents.list`:
 ```json
 {
-  "id": "rossi",
-  "workspace": "~/.openclaw/workspace-rossi",
+  "id": "{your-agent-id}",
+  "workspace": "~/.openclaw/workspace-{your-agent-id}",
   "model": "anthropic/claude-sonnet-4-6",
   "tools": {
     "profile": "minimal",
@@ -339,23 +387,23 @@ Add to `agents.list`:
 }
 ```
 
-#### Step 3 · Configure the agent persona
+#### Step 4 · Configure the agent persona
 
-Create `~/.openclaw/workspace-rossi/` and add:
+Create `~/.openclaw/workspace-{your-agent-id}/` and add:
 - `SOUL.md`: personality definition (role, tone, boundaries)
 - `IDENTITY.md`: agent identity info
 
-#### Step 4 · System permissions
+#### Step 5 · System permissions
 
 System Settings → Notifications → WeChat → enable **Allow notifications**.
 
-#### Step 5 · Start and bind a group
+#### Step 6 · Start and bind a group
 
 ```bash
 openclaw gateway restart
 ```
 
-In your target WeChat group, send `！rossi` (fullwidth exclamation). When rossi replies to confirm, the group is bound.
+In your target WeChat group, send your `{bindTrigger}`. When the agent replies to confirm, the group is bound.
 
 ---
 
@@ -363,8 +411,8 @@ In your target WeChat group, send `！rossi` (fullwidth exclamation). When rossi
 
 | Action | How |
 |--------|-----|
-| Switch target group | Send `！rossi` in the new group |
-| Trigger rossi | Send `＆rossi your question` in the bound group |
+| Switch target group | Send `{bindTrigger}` in the new group |
+| Invoke agent | Send `{botTrigger} your question` in the bound group |
 | Check current binding | `grep "bound active group" /tmp/openclaw/openclaw-$(date +%Y-%m-%d).log \| tail -1` |
 
 ---
